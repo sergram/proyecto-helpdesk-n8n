@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+      >
+
+      <input
+        type="email"
+        id="correo"
+        placeholder="Correo"
+        required
+      >
+
+      <textarea
+        id="asunto"
+        placeholder="Describe el problema"
+        rows="5"
+        required
+      ></textarea>
+
+      <button type="submit">
+        Enviar Ticket
+      </button>
+
+    </form>
+
+    <div id="mensaje"></div>
+  </div>
+
+<script>
+
+document.getElementById('ticketForm')
+.addEventListener('submit', async function(e) {
+
+  e.preventDefault();
+
+  const datos = {
+    nombre: document.getElementById('nombre').value,
+    correo: document.getElementById('correo').value,
+    asunto: document.getElementById('asunto').value
+  };
+
+  try {
+
+    const respuesta = await fetch(
+      'http://localhost:5678/webhook-test/nuevo-ticket',
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(datos)
+      }
+    );
+
+    if (respuesta.ok) {
+
+      document.getElementById('mensaje').innerHTML =
+      '✅ Ticket enviado correctamente';
+
+      document.getElementById('ticketForm').reset();
+
+    } else {
+
+      document.getElementById('mensaje').innerHTML =
+      '❌ Error enviando ticket';
+    }
+
+  } catch(error) {
+
+    console.error(error);
+
+    document.getElementById('mensaje').innerHTML =
+    '❌ Error de conexión con n8n';
+  }
+
+});
+
+</script>
+
+</body>
+</html>
