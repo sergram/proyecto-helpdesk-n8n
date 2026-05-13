@@ -1,0 +1,418 @@
+{
+  "name": "My workflow 2",
+  "nodes": [
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "82ffd38c-d197-44f0-a2ab-01efbf84675f",
+              "leftValue": "={{ $json.body.correo }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        608,
+        704
+      ],
+      "id": "28b44824-d210-4f1c-9b1a-53bd17c3ef9f",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "5f960489-1ff7-40b7-9f13-d29ffc375a1a",
+              "leftValue": "={{ $json.body.asunto }}",
+              "rightValue": "urgente",
+              "operator": {
+                "type": "string",
+                "operation": "contains"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        832,
+        528
+      ],
+      "id": "e4510f98-7256-418a-8046-18d22ed3d3e2",
+      "name": "If1"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "a040561a-8b08-4926-bf22-29ff3cbdbbeb",
+              "name": "body.nombre",
+              "value": "alto",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1104,
+        416
+      ],
+      "id": "b5d33143-8063-417b-a670-3d316858aa5e",
+      "name": "Edit Fields1"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "ad3839f0-d987-4768-a3b3-55013778e770",
+              "name": "body.nombre",
+              "value": "normal",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1040,
+        752
+      ],
+      "id": "a511e043-4180-4dee-b785-dfaf7e06fbc8",
+      "name": "Edit Fields2"
+    },
+    {
+      "parameters": {
+        "schema": {
+          "__rl": true,
+          "value": "public",
+          "mode": "list",
+          "cachedResultName": "public"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tickets",
+          "mode": "list",
+          "cachedResultName": "tickets"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "nombre": "={{ $('Edit Fields3').item.json.body.nombre }}",
+            "correo": "={{ $('Edit Fields3').item.json.body.correo }}",
+            "asunto": "={{ $('Edit Fields3').item.json.body.asunto }}"
+          },
+          "matchingColumns": [
+            "id"
+          ],
+          "schema": [
+            {
+              "id": "id",
+              "displayName": "id",
+              "required": false,
+              "defaultMatch": true,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "nombre",
+              "displayName": "nombre",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "correo",
+              "displayName": "correo",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "asunto",
+              "displayName": "asunto",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "prioridad",
+              "displayName": "prioridad",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "fecha",
+              "displayName": "fecha",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "dateTime",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        1440,
+        832
+      ],
+      "id": "c50610c1-1346-4293-b879-ff7d1f0e9cad",
+      "name": "Insert rows in a table",
+      "credentials": {
+        "postgres": {
+          "id": "STHkTiEseI6Pme8T",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $('Edit Fields3').item.json.body.correo }}",
+        "subject": "hoal",
+        "emailType": "text",
+        "message": "asd",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        1968,
+        576
+      ],
+      "id": "60d6c505-5405-4baa-907d-321e13461751",
+      "name": "Send a message",
+      "webhookId": "29cbbf24-25c1-4e5d-b7b5-469317080593",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "23hHipo90l3sCMwH",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "sergram2242@gmail.com",
+        "subject": "ad",
+        "emailType": "text",
+        "message": "aaa",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        1712,
+        928
+      ],
+      "id": "ca88643c-479e-40cf-ae01-aef2da3a2468",
+      "name": "Send a message1",
+      "webhookId": "314640f9-ebae-449e-87e1-f3fa77c9ebe0",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "23hHipo90l3sCMwH",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "5bce1c6b-8400-4579-a975-894e91bdb8a7",
+              "name": "body.nombre",
+              "value": "={{ $json.body.nombre }}",
+              "type": "string"
+            },
+            {
+              "id": "89bdd609-0068-4c13-8dab-53b78b8b7a2a",
+              "name": "body.correo",
+              "value": "={{ $json.body.correo }}",
+              "type": "string"
+            },
+            {
+              "id": "5c5d8be8-4ccd-4819-8cfc-72420374eb76",
+              "name": "body.asunto",
+              "value": "={{ $json.body.asunto }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        352,
+        848
+      ],
+      "id": "e3715edc-1f5b-4872-b305-c1972254c4ec",
+      "name": "Edit Fields3"
+    },
+    {
+      "parameters": {
+        "inputSource": "passthrough"
+      },
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        -80,
+        768
+      ],
+      "id": "eb39821e-ab6c-4403-8cb9-b2f824d774b1",
+      "name": "When Executed by Another Workflow"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "If": {
+      "main": [
+        [
+          {
+            "node": "If1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If1": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Edit Fields2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields1": {
+      "main": [
+        [
+          {
+            "node": "Insert rows in a table",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields2": {
+      "main": [
+        [
+          {
+            "node": "Insert rows in a table",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Insert rows in a table": {
+      "main": [
+        [
+          {
+            "node": "Send a message1",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Send a message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields3": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "When Executed by Another Workflow": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "ac6ce166-427e-4b98-a51b-b0e636be6139",
+  "meta": {
+    "instanceId": "378944749d12f18d8a44b8de186e81e1b9ea6df85d131826499c254a5e9ae13a"
+  },
+  "id": "l8a8ykKNfObuGJpR",
+  "tags": []
+}

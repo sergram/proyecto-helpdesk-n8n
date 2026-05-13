@@ -12,7 +12,7 @@ services:
       POSTGRES_DB: helpdesk
 
     ports:
-      - "5433:5433"
+      - "5433:5432"
 
     volumes:
       - postgres_data:/var/lib/postgresql/data
@@ -33,7 +33,7 @@ services:
     restart: always
 
     ports:
-      - "5679:5679"
+      - "5678:5678"
 
     environment:
       - TZ=America/Guatemala
