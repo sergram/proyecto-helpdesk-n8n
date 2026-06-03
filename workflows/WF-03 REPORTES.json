@@ -1,0 +1,230 @@
+{
+  "name": "WF-03 REPORTES",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "weeks",
+              "triggerAtDay": [
+                1
+              ],
+              "triggerAtHour": 7
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        608,
+        0
+      ],
+      "id": "e30dd16e-0572-4344-9ed7-6708e928ac91",
+      "name": "Schedule Trigger"
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT COUNT(*) AS total\nFROM tickets;",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        1280,
+        0
+      ],
+      "id": "4ca2b655-1796-4b33-be46-da27937449c5",
+      "name": "Total Tickets",
+      "credentials": {
+        "postgres": {
+          "id": "STHkTiEseI6Pme8T",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT\ncategoria,\nCOUNT(*) AS cantidad\nFROM tickets\nGROUP BY categoria\nORDER BY cantidad DESC;",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        1504,
+        0
+      ],
+      "id": "4ade1cfa-8a00-4d3d-8c91-95680a3a1483",
+      "name": "Tickets por Categoría",
+      "credentials": {
+        "postgres": {
+          "id": "STHkTiEseI6Pme8T",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT\nprioridad,\nCOUNT(*) AS cantidad\nFROM tickets\nGROUP BY prioridad;",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        1056,
+        0
+      ],
+      "id": "370ed0ae-d16d-4e27-b3fc-8915ea6420d8",
+      "name": "Prioridades",
+      "credentials": {
+        "postgres": {
+          "id": "STHkTiEseI6Pme8T",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT COUNT(*) AS errores\nFROM error_log;",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        832,
+        0
+      ],
+      "id": "4b7efc98-f1fb-48c9-ac94-5b48006ac514",
+      "name": "Errores Sistema",
+      "credentials": {
+        "postgres": {
+          "id": "STHkTiEseI6Pme8T",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const totalTickets =\n$('Total Tickets').first().json.total;\n\nconst totalErrores =\n$('Errores Sistema').first().json.errores;\n\nconst categorias =\n$('Tickets por Categoría').all();\n\nconst prioridades =\n$('Prioridades').all();\n\nlet categoriasHTML = '';\n\nfor (const item of categorias) {\n\n  categoriasHTML += `\n    <tr>\n      <td>${item.json.categoria}</td>\n      <td>${item.json.cantidad}</td>\n    </tr>\n  `;\n\n}\n\nlet prioridadesHTML = '';\n\nfor (const item of prioridades) {\n\n  let color = '#22c55e';\n\n  if (item.json.prioridad === 'ALTA') {\n    color = '#ef4444';\n  }\n\n  if (item.json.prioridad === 'MEDIA') {\n    color = '#f59e0b';\n  }\n\n  prioridadesHTML += `\n    <tr>\n      <td style=\"color:${color};font-weight:bold;\">\n        ${item.json.prioridad}\n      </td>\n      <td>${item.json.cantidad}</td>\n    </tr>\n  `;\n\n}\n\nconst html = `\n\n<!DOCTYPE html>\n\n<html>\n\n<head>\n\n<meta charset=\"UTF-8\">\n\n</head>\n\n<body style=\"font-family:Arial, sans-serif; background:#f1f5f9; padding:20px;\">\n\n<div style=\"\nmax-width:900px;\nmargin:auto;\nbackground:white;\nborder-radius:12px;\noverflow:hidden;\nbox-shadow:0 4px 12px rgba(0,0,0,0.1);\n\">\n\n<div style=\"\nbackground:#1e293b;\ncolor:white;\npadding:25px;\ntext-align:center;\n\">\n\n<h1>📊 REPORTE SEMANAL HELP DESK</h1>\n\n<p>Mesa de Ayuda - Proyecto Análisis de Sistemas I</p>\n\n</div>\n\n<div style=\"padding:25px;\">\n\n<h2>Resumen General</h2>\n\n<table style=\"\nwidth:100%;\nborder-collapse:collapse;\nmargin-bottom:25px;\n\">\n\n<tr>\n<td style=\"\npadding:15px;\nbackground:#dbeafe;\nfont-weight:bold;\n\">\n🎫 Tickets Registrados\n</td>\n\n<td style=\"\npadding:15px;\nfont-size:20px;\nfont-weight:bold;\n\">\n${totalTickets}\n</td>\n</tr>\n\n<tr>\n<td style=\"\npadding:15px;\nbackground:#fee2e2;\nfont-weight:bold;\n\">\n⚠️ Errores Registrados\n</td>\n\n<td style=\"\npadding:15px;\nfont-size:20px;\nfont-weight:bold;\n\">\n${totalErrores}\n</td>\n</tr>\n\n</table>\n\n<h2>Tickets por Categoría</h2>\n\n<table style=\"\nwidth:100%;\nborder-collapse:collapse;\nmargin-bottom:25px;\n\">\n\n<tr style=\"\nbackground:#2563eb;\ncolor:white;\n\">\n\n<th style=\"padding:12px;\">\nCategoría\n</th>\n\n<th style=\"padding:12px;\">\nCantidad\n</th>\n\n</tr>\n\n${categoriasHTML}\n\n</table>\n\n<h2>Tickets por Prioridad</h2>\n\n<table style=\"\nwidth:100%;\nborder-collapse:collapse;\n\">\n\n<tr style=\"\nbackground:#0f766e;\ncolor:white;\n\">\n\n<th style=\"padding:12px;\">\nPrioridad\n</th>\n\n<th style=\"padding:12px;\">\nCantidad\n</th>\n\n</tr>\n\n${prioridadesHTML}\n\n</table>\n\n<br>\n\n<hr>\n\n<p>\n📅 Fecha de generación:\n<strong>\n${new Date().toLocaleDateString('es-GT')}\n</strong>\n</p>\n\n<p style=\"color:#64748b;\">\nEste reporte fue generado automáticamente por n8n.\n</p>\n\n</div>\n\n<div style=\"\nbackground:#e2e8f0;\npadding:15px;\ntext-align:center;\nfont-size:12px;\ncolor:#475569;\n\">\n\nSistema Mesa de Ayuda<br>\nUniversidad Mariano Gálvez<br>\nAnálisis de Sistemas I\n\n</div>\n\n</div>\n\n</body>\n\n</html>\n\n`;\n\nreturn [{\n  json: {\n    reporte_html: html\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1728,
+        0
+      ],
+      "id": "ace7ec2f-5c0b-4009-8021-6a4bc49ed670",
+      "name": "Generar Reporte"
+    },
+    {
+      "parameters": {
+        "sendTo": "sergram2242@gmail.com",
+        "subject": "REPORTES SEMANALES",
+        "message": "={{ $json.reporte_html }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        1952,
+        0
+      ],
+      "id": "6df38c89-f1de-45c0-9621-fd15fa966152",
+      "name": "Send a message",
+      "webhookId": "334b75ea-8c77-4534-b7c7-26912a473c9d",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "23hHipo90l3sCMwH",
+          "name": "Gmail account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Total Tickets": {
+      "main": [
+        [
+          {
+            "node": "Tickets por Categoría",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Tickets por Categoría": {
+      "main": [
+        [
+          {
+            "node": "Generar Reporte",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prioridades": {
+      "main": [
+        [
+          {
+            "node": "Total Tickets",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Errores Sistema": {
+      "main": [
+        [
+          {
+            "node": "Prioridades",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Errores Sistema",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generar Reporte": {
+      "main": [
+        [
+          {
+            "node": "Send a message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "89ccb672-a15d-4206-9765-93331aa794b2",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "378944749d12f18d8a44b8de186e81e1b9ea6df85d131826499c254a5e9ae13a"
+  },
+  "id": "bXl5rkFjMaDXATDc",
+  "tags": []
+}

@@ -1,0 +1,675 @@
+{
+  "name": "WF-01-Ingesta-Tickets",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "crear-ticket",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        0,
+        80
+      ],
+      "id": "469d846e-d060-4b3e-a36a-88d7e4a31624",
+      "name": "Webhook",
+      "webhookId": "b630b41d-6f29-4260-80e2-3859cca8da2e"
+    },
+    {
+      "parameters": {
+        "schema": {
+          "__rl": true,
+          "mode": "list",
+          "value": "public"
+        },
+        "table": {
+          "__rl": true,
+          "value": "audit_log",
+          "mode": "list",
+          "cachedResultName": "audit_log"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "accion": "Ticket recibido",
+            "detalle": "={{ $('Webhook').item.json.body.nombre + ' envio una solicitud'}}",
+            "ticket_codigo": "=={{$json.uuid}}"
+          },
+          "matchingColumns": [
+            "id"
+          ],
+          "schema": [
+            {
+              "id": "id",
+              "displayName": "id",
+              "required": false,
+              "defaultMatch": true,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "ticket_codigo",
+              "displayName": "ticket_codigo",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "accion",
+              "displayName": "accion",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "detalle",
+              "displayName": "detalle",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "fecha",
+              "displayName": "fecha",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "dateTime",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        896,
+        -112
+      ],
+      "id": "89ba7208-454d-4293-b8f5-938581e7ce21",
+      "name": "Audit Ingreso",
+      "credentials": {
+        "postgres": {
+          "id": "STHkTiEseI6Pme8T",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "{\n  \"status\": \"ERROR\",\n  \"codigo\": 400,\n  \"mensaje\": \"Todos los campos son obligatorios\"\n}",
+        "options": {
+          "responseCode": 400
+        }
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        448,
+        176
+      ],
+      "id": "57351351-a5c0-46dd-bdb5-b02990ec461c",
+      "name": "Respuesta Error"
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "value": "X5t4DMy21Nlgc3EC",
+          "mode": "list",
+          "cachedResultUrl": "/workflow/X5t4DMy21Nlgc3EC",
+          "cachedResultName": "WF-02-Procesamiento-Tickets"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {},
+          "matchingColumns": [],
+          "schema": [],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": true
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.3,
+      "position": [
+        1568,
+        -112
+      ],
+      "id": "54461bf8-9f15-4c07-9cf5-916136fe638d",
+      "name": "Enviar a Procesamiento"
+    },
+    {
+      "parameters": {
+        "schema": {
+          "__rl": true,
+          "mode": "list",
+          "value": "public"
+        },
+        "table": {
+          "__rl": true,
+          "value": "error_log",
+          "mode": "list",
+          "cachedResultName": "error_log"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "workflow": "WF-01-Ingesta-Tickets",
+            "nodo": "Validar Campos",
+            "mensaje_error": "== 'Campos obligatorios vacíos'"
+          },
+          "matchingColumns": [
+            "id"
+          ],
+          "schema": [
+            {
+              "id": "id",
+              "displayName": "id",
+              "required": false,
+              "defaultMatch": true,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "workflow",
+              "displayName": "workflow",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "nodo",
+              "displayName": "nodo",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "mensaje_error",
+              "displayName": "mensaje_error",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "fecha",
+              "displayName": "fecha",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "dateTime",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        672,
+        176
+      ],
+      "id": "95859095-443c-4e51-86ce-11ed5b057e04",
+      "name": "Registrar Error Validación",
+      "credentials": {
+        "postgres": {
+          "id": "STHkTiEseI6Pme8T",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "af4452cd-4f86-4356-b73b-23cbf4fdcfe7",
+              "leftValue": "={{ $json.body.nombre }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            },
+            {
+              "id": "07afc8e2-3db1-4fd6-9e34-548fb287d70c",
+              "leftValue": "={{ $json.body.correo }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            },
+            {
+              "id": "95a95008-fd0e-458d-893b-2fd1ae7df2f9",
+              "leftValue": "={{ $json.body.asunto }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            },
+            {
+              "id": "7f3dcdf7-b8c2-4f0e-8f44-47a1996d231d",
+              "leftValue": "={{ $json.body.categoria }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        224,
+        80
+      ],
+      "id": "7417782a-981d-48bc-8ddd-500d7ca1cc03",
+      "name": "Validar Campos"
+    },
+    {
+      "parameters": {
+        "jsCode": "const uuid =\n'ING-' + Date.now();\n\nreturn [{\njson: {\n\nuuid,\nnombre: $json.nombre,\ncorreo: $json.correo,\ncategoria: $json.categoria,\nasunto: $json.asunto,\nfecha_ingreso: new Date().toISOString()\n\n}\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        448,
+        -16
+      ],
+      "id": "82f345ae-b4e6-4991-bf61-c0b5a21ddbe2",
+      "name": "Preparar Datos"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "55460abf-7fab-4437-8f94-b71af4ae8447",
+              "leftValue": "={{ $('Validar Campos').item.json.body.correo }}",
+              "rightValue": "@miumg.edu.gt",
+              "operator": {
+                "type": "string",
+                "operation": "contains"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        672,
+        -16
+      ],
+      "id": "3472b287-0a57-4072-abad-f9fecc96db50",
+      "name": "Validar Correo"
+    },
+    {
+      "parameters": {
+        "schema": {
+          "__rl": true,
+          "mode": "list",
+          "value": "public"
+        },
+        "table": {
+          "__rl": true,
+          "value": "error_log",
+          "mode": "list",
+          "cachedResultName": "error_log"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "workflow": "WF-01-Ingesta-Tickets",
+            "nodo": "Validar correo",
+            "mensaje_error": "== 'Correo invalido'"
+          },
+          "matchingColumns": [
+            "id"
+          ],
+          "schema": [
+            {
+              "id": "id",
+              "displayName": "id",
+              "required": false,
+              "defaultMatch": true,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "workflow",
+              "displayName": "workflow",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "nodo",
+              "displayName": "nodo",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "mensaje_error",
+              "displayName": "mensaje_error",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "fecha",
+              "displayName": "fecha",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "dateTime",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        896,
+        80
+      ],
+      "id": "23b81b6a-6ff7-47bb-9b60-957d5c0c26fc",
+      "name": "Registrar Error Validación1",
+      "credentials": {
+        "postgres": {
+          "id": "STHkTiEseI6Pme8T",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "{\n  \"status\": \"ERROR\",\n  \"codigo\": 401,\n  \"mensaje\": \"correo no valido\"\n}",
+        "options": {
+          "responseCode": 401
+        }
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        1120,
+        80
+      ],
+      "id": "4d94020b-0961-4927-a16b-a7af196ad724",
+      "name": "Respuesta error 2"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "{\n  \"status\": \"ok\",\n  \"codigo\": 200,\n  \"mensaje\": \"ticket guardado\"\n}",
+        "options": {
+          "responseCode": 200
+        }
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        1120,
+        -112
+      ],
+      "id": "bd2b2f9a-c0c9-4f42-bd87-e4be4267fbb9",
+      "name": "Respuesta validacion"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "d996f264-a039-464d-8b10-3e4f75839b0e",
+              "name": "ticket_codigo",
+              "value": "={{ $json.ticket_codigo }}",
+              "type": "string"
+            },
+            {
+              "id": "87729385-e13d-44df-bec7-2766d23e83a6",
+              "name": "body.nombre",
+              "value": "={{ $('Validar Campos').item.json.body.nombre }}",
+              "type": "string"
+            },
+            {
+              "id": "1fa995ac-d9e9-48d5-8510-bb1a39189e4e",
+              "name": "body.correo",
+              "value": "={{ $('Validar Campos').item.json.body.correo }}",
+              "type": "string"
+            },
+            {
+              "id": "96f19aeb-6b4b-4251-9c13-bf5e8b2a177b",
+              "name": "body.categoria",
+              "value": "={{ $('Validar Campos').item.json.body.categoria }}",
+              "type": "string"
+            },
+            {
+              "id": "52486768-a503-4c97-9635-9516e240432e",
+              "name": "body.asunto",
+              "value": "={{ $('Validar Campos').item.json.body.asunto }}",
+              "type": "string"
+            },
+            {
+              "id": "159c3a7b-ba31-40fd-be78-e97bd40eb6d8",
+              "name": "fecha",
+              "value": "={{ $json.fecha }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1344,
+        -112
+      ],
+      "id": "6c314a99-ed86-4176-b2f6-a2ecacadab3e",
+      "name": "Edit Fields"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Validar Campos",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Audit Ingreso": {
+      "main": [
+        [
+          {
+            "node": "Respuesta validacion",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Respuesta Error": {
+      "main": [
+        [
+          {
+            "node": "Registrar Error Validación",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Validar Campos": {
+      "main": [
+        [
+          {
+            "node": "Preparar Datos",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Respuesta Error",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Preparar Datos": {
+      "main": [
+        [
+          {
+            "node": "Validar Correo",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Validar Correo": {
+      "main": [
+        [
+          {
+            "node": "Audit Ingreso",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Registrar Error Validación1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Registrar Error Validación1": {
+      "main": [
+        [
+          {
+            "node": "Respuesta error 2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Respuesta validacion": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "Enviar a Procesamiento",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Registrar Error Validación": {
+      "main": [
+        []
+      ]
+    },
+    "Respuesta error 2": {
+      "main": [
+        []
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "84820899-75b7-4690-ac42-f290fda44ed6",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "378944749d12f18d8a44b8de186e81e1b9ea6df85d131826499c254a5e9ae13a"
+  },
+  "id": "MQpfw3ZO5iOvmTfb",
+  "tags": []
+}

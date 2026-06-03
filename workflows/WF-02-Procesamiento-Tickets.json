@@ -1,0 +1,655 @@
+{
+  "name": "WF-02-Procesamiento-Tickets",
+  "nodes": [
+    {
+      "parameters": {
+        "inputSource": "passthrough"
+      },
+      "id": "c055762a-8fe7-4141-a639-df2372f30060",
+      "typeVersion": 1.1,
+      "name": "When Executed by Another Workflow",
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "position": [
+        272,
+        336
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const categoria = ($('seleccionar datos').first().json.body.categoria)\n  .trim()\n  .toLowerCase();\n\nlet prioridad = \"BAJA\";\n\nswitch (categoria) {\n\n  case \"red\":\n  case \"base de datos\":\n    prioridad = \"ALTA\";\n    break;\n\n  case \"hardware\":\n  case \"correo\":\n    prioridad = \"MEDIA\";\n    break;\n\n  case \"software\":\n  case \"otros\":\n  default:\n    prioridad = \"BAJA\";\n}\n\nreturn [{\n  json: {\n    ...$json,\n    prioridad,\n    categoria_normalizada: categoria\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        720,
+        336
+      ],
+      "id": "04bc3e8e-ff55-4df8-9264-8663db4df1e9",
+      "name": "Asignar Prioridad"
+    },
+    {
+      "parameters": {
+        "schema": {
+          "__rl": true,
+          "mode": "list",
+          "value": "public"
+        },
+        "table": {
+          "__rl": true,
+          "value": "audit_log",
+          "mode": "list",
+          "cachedResultName": "audit_log"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "accion": "Ticket creado",
+            "detalle": "={{'Prioridad asignada: ' + $json.prioridad}}",
+            "ticket_codigo": "={{ $('seleccionar datos').item.json.ticket_codigo }}",
+            "fecha": "={{ $('seleccionar datos').item.json.fecha }}"
+          },
+          "matchingColumns": [
+            "id"
+          ],
+          "schema": [
+            {
+              "id": "id",
+              "displayName": "id",
+              "required": false,
+              "defaultMatch": true,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "ticket_codigo",
+              "displayName": "ticket_codigo",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "accion",
+              "displayName": "accion",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "detalle",
+              "displayName": "detalle",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "fecha",
+              "displayName": "fecha",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "dateTime",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        1168,
+        336
+      ],
+      "id": "85a89541-4404-4e7a-a65b-173e17d6d912",
+      "name": "Audit Ticket",
+      "credentials": {
+        "postgres": {
+          "id": "STHkTiEseI6Pme8T",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "schema": {
+          "__rl": true,
+          "mode": "list",
+          "value": "public"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tickets",
+          "mode": "list",
+          "cachedResultName": "tickets"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "prioridad": "={{ $json.prioridad }}",
+            "asunto": "={{ $('seleccionar datos').item.json.body.asunto }}",
+            "correo": "={{ $('seleccionar datos').item.json.body.correo }}",
+            "nombre": "={{ $('seleccionar datos').item.json.body.nombre }}",
+            "ticket_codigo": "={{ $('seleccionar datos').item.json.ticket_codigo }}",
+            "fecha_creacion": "={{ $json.fecha }}",
+            "categoria": "={{ $json.categoria_normalizada }}"
+          },
+          "matchingColumns": [
+            "id"
+          ],
+          "schema": [
+            {
+              "id": "id",
+              "displayName": "id",
+              "required": false,
+              "defaultMatch": true,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "ticket_codigo",
+              "displayName": "ticket_codigo",
+              "required": true,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "nombre",
+              "displayName": "nombre",
+              "required": true,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "correo",
+              "displayName": "correo",
+              "required": true,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "asunto",
+              "displayName": "asunto",
+              "required": true,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "prioridad",
+              "displayName": "prioridad",
+              "required": true,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "fecha_creacion",
+              "displayName": "fecha_creacion",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "dateTime",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "categoria",
+              "displayName": "categoria",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "estado",
+              "displayName": "estado",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        944,
+        336
+      ],
+      "id": "fe7fd2e0-68fd-4e7a-8056-936b14a9d527",
+      "name": "Guardar Ticket",
+      "credentials": {
+        "postgres": {
+          "id": "STHkTiEseI6Pme8T",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "32da9052-6057-415f-b85a-5b382a98ac22",
+              "name": "body.nombre",
+              "value": "={{ $json.body.nombre }}",
+              "type": "string"
+            },
+            {
+              "id": "3fb7eb95-db3d-40b5-8ffd-adab0fefb6fe",
+              "name": "body.correo",
+              "value": "={{ $json.body.correo }}",
+              "type": "string"
+            },
+            {
+              "id": "53047e98-bbb3-40fd-91dd-f219b7f7cfd7",
+              "name": "body.categoria",
+              "value": "={{ $json.body.categoria }}",
+              "type": "string"
+            },
+            {
+              "id": "bf990e0e-dabf-4962-be9c-42489738a19d",
+              "name": "body.asunto",
+              "value": "={{ $json.body.asunto }}",
+              "type": "string"
+            },
+            {
+              "id": "de137eca-daf8-4331-9c89-fe2464af3ffa",
+              "name": "ticket_codigo",
+              "value": "={{ $json.ticket_codigo }}",
+              "type": "string"
+            },
+            {
+              "id": "9ad60fa6-ccfe-4844-9702-774f771d71d6",
+              "name": "fecha",
+              "value": "={{ $json.fecha }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        496,
+        336
+      ],
+      "id": "0878c3fd-6440-441d-9ade-2bd207feb93f",
+      "name": "seleccionar datos"
+    },
+    {
+      "parameters": {
+        "sendTo": "sergram2242@gmail.com",
+        "subject": "Nuevo ticket",
+        "message": "=<!DOCTYPE html>\n<html>\n<body style=\"font-family: Arial, sans-serif;\">\n\n<div style=\"max-width:700px;margin:auto;border:1px solid #ddd;border-radius:10px;padding:20px;\">\n\n  <h2 style=\"color:#dc2626;\">\n    Nuevo Ticket Registrado\n  </h2>\n\n  <table style=\"width:100%;border-collapse:collapse;\">\n\n    <tr>\n      <td><strong>Código:</strong></td>\n      <td>{{ $json.ticket_codigo }}</td>\n    </tr>\n\n    <tr>\n      <td><strong>Usuario:</strong></td>\n      <td>{{ $json.body.nombre }}</td>\n    </tr>\n\n    <tr>\n      <td><strong>Correo:</strong></td>\n      <td>{{ $json.body.correo }}</td>\n    </tr>\n\n    <tr>\n      <td><strong>Categoría:</strong></td>\n      <td>{{ $json.body.categoria}}</td>\n    </tr>\n\n    <tr>\n      <td><strong>Prioridad:</strong></td>\n      <td>\n        <strong style=\"color:red;\">\n          {{ $json.prioridad }}\n        </strong>\n      </td>\n    </tr>\n\n  </table>\n\n  <br>\n\n  <h3>Descripción del problema</h3>\n\n  <div style=\"\n      background:#f8fafc;\n      border-left:4px solid #2563eb;\n      padding:15px;\n      border-radius:5px;\n  \">\n    {{ $json.body.asunto }}\n  </div>\n\n  <br>\n\n  <p>\n    Favor dar seguimiento según la prioridad asignada.\n  </p>\n\n  <hr>\n\n  <p style=\"font-size:12px;color:gray;\">\n    Sistema Mesa de Ayuda - Notificación Automática\n  </p>\n\n</div>\n\n</body>\n</html>",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        1616,
+        336
+      ],
+      "id": "d8675027-d3a0-4958-a720-0b22d9d96925",
+      "name": "Send a message1",
+      "webhookId": "96e83f19-b784-4c14-8a85-e64f3b75cf46",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "23hHipo90l3sCMwH",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $('seleccionar datos').item.json.body.correo }}",
+        "subject": "Ticket recibido correctamente",
+        "message": "=<!DOCTYPE html>\n<html>\n<body style=\"font-family: Arial, sans-serif;\">\n\n  <div style=\"max-width:600px;margin:auto;border:1px solid #ddd;border-radius:10px;padding:20px;\">\n\n    <h2 style=\"color:#2563eb;\">\n      Ticket recibido correctamente\n    </h2>\n\n    <p>\n      Estimado/a <strong>{{ $json.body.nombre }}</strong>,\n    </p>\n\n    <p>\n      Su solicitud ha sido registrada exitosamente en la Mesa de Ayuda.\n    </p>\n\n    <table style=\"width:100%;border-collapse:collapse;\">\n      <tr>\n        <td><strong>Código:</strong></td>\n        <td>{{ $json.ticket_codigo }}</td>\n      </tr>\n\n      <tr>\n        <td><strong>Categoría:</strong></td>\n        <td>{{ $json.body.categoria }}</td>\n      </tr>\n\n      <tr>\n        <td><strong>Prioridad:</strong></td>\n        <td>{{ $json.prioridad }}</td>\n      </tr>\n\n    </table>\n\n    <br>\n\n    <p>\n      Nuestro equipo revisará su solicitud a la brevedad.\n    </p>\n\n    <hr>\n\n    <p style=\"font-size:12px;color:gray;\">\n      Mesa de Ayuda Automatizada - Proyecto Análisis de Sistemas I\n    </p>\n\n  </div>\n\n</body>\n</html>",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        2064,
+        336
+      ],
+      "id": "4bc37e3d-e9b0-4cd5-bafa-985c9344a0cc",
+      "name": "Send a message",
+      "webhookId": "96e83f19-b784-4c14-8a85-e64f3b75cf46",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "23hHipo90l3sCMwH",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "d6c8cabd-cc5e-4230-8ff9-98ebdd567eb4",
+              "name": "body.nombre",
+              "value": "={{ $('Edit Fields2').item.json.body.nombre }}",
+              "type": "string"
+            },
+            {
+              "id": "aa178dcf-162e-45ce-81c9-54480e7caebb",
+              "name": "body.categoria",
+              "value": "={{ $('Edit Fields2').item.json.body.categoria }}",
+              "type": "string"
+            },
+            {
+              "id": "cf439b40-130e-46c8-8756-789c282a4674",
+              "name": "ticket_codigo",
+              "value": "={{ $('Edit Fields2').item.json.ticket_codigo }}",
+              "type": "string"
+            },
+            {
+              "id": "7284fc36-ae48-4b31-9f45-4f0339abcc44",
+              "name": "prioridad",
+              "value": "={{ $('Edit Fields2').item.json.prioridad }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1840,
+        336
+      ],
+      "id": "30f20c4c-13a4-4425-a1b6-a4ec47975ce9",
+      "name": "Edit Fields1"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "6a87c317-f17b-4a7f-80d4-d1cfd4be3ec9",
+              "name": "body.nombre",
+              "value": "={{ $('seleccionar datos').item.json.body.nombre }}",
+              "type": "string"
+            },
+            {
+              "id": "89f7ef54-a6ed-4f0b-a58d-4d641191ce36",
+              "name": "ticket_codigo",
+              "value": "={{ $json.ticket_codigo }}",
+              "type": "string"
+            },
+            {
+              "id": "2f998fcf-5fa4-47b3-a8c6-6e4948c59cd2",
+              "name": "body.categoria",
+              "value": "={{ $('seleccionar datos').item.json.body.categoria }}",
+              "type": "string"
+            },
+            {
+              "id": "3a370630-8146-4327-aea8-9400aa9204a0",
+              "name": "body.asunto",
+              "value": "={{ $('seleccionar datos').item.json.body.asunto }}",
+              "type": "string"
+            },
+            {
+              "id": "214de095-c934-43e3-bb16-d7311b16afde",
+              "name": "prioridad",
+              "value": "={{ $('Asignar Prioridad').item.json.prioridad }}",
+              "type": "string"
+            },
+            {
+              "id": "8a794a19-4a9e-45a4-82bc-a60b13984d22",
+              "name": "body.correo",
+              "value": "={{ $('seleccionar datos').item.json.body.correo }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1392,
+        336
+      ],
+      "id": "9bf834ee-14e2-4ff4-bf87-42833724a52f",
+      "name": "Edit Fields2"
+    },
+    {
+      "parameters": {
+        "schema": {
+          "__rl": true,
+          "mode": "list",
+          "value": "public"
+        },
+        "table": {
+          "__rl": true,
+          "value": "audit_log",
+          "mode": "list",
+          "cachedResultName": "audit_log"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "ticket_codigo": "={{ $('seleccionar datos').item.json.ticket_codigo }}",
+            "fecha": "={{ $('seleccionar datos').item.json.fecha }}",
+            "accion": "mensajes enviados",
+            "detalle": "={{'Correo enviado a ' + $('Edit Fields1').item.json.body.nombre}}"
+          },
+          "matchingColumns": [
+            "id"
+          ],
+          "schema": [
+            {
+              "id": "id",
+              "displayName": "id",
+              "required": false,
+              "defaultMatch": true,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "ticket_codigo",
+              "displayName": "ticket_codigo",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "accion",
+              "displayName": "accion",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "detalle",
+              "displayName": "detalle",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "fecha",
+              "displayName": "fecha",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "dateTime",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        2288,
+        336
+      ],
+      "id": "6e8582cd-24f3-4dda-811e-28594cbda073",
+      "name": "Audit Ticket1",
+      "credentials": {
+        "postgres": {
+          "id": "STHkTiEseI6Pme8T",
+          "name": "Postgres account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When Executed by Another Workflow": {
+      "main": [
+        [
+          {
+            "node": "seleccionar datos",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Asignar Prioridad": {
+      "main": [
+        [
+          {
+            "node": "Guardar Ticket",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Audit Ticket": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Guardar Ticket": {
+      "main": [
+        [
+          {
+            "node": "Audit Ticket",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "seleccionar datos": {
+      "main": [
+        [
+          {
+            "node": "Asignar Prioridad",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send a message1": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields1": {
+      "main": [
+        [
+          {
+            "node": "Send a message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields2": {
+      "main": [
+        [
+          {
+            "node": "Send a message1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send a message": {
+      "main": [
+        [
+          {
+            "node": "Audit Ticket1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "d5eed78a-126f-48f3-8572-3388b07d0daf",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "378944749d12f18d8a44b8de186e81e1b9ea6df85d131826499c254a5e9ae13a"
+  },
+  "id": "X5t4DMy21Nlgc3EC",
+  "tags": []
+}

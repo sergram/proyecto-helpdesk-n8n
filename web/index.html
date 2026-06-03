@@ -1,19 +1,190 @@
 <!DOCTYPE html>
-      >
+<html lang="es">
 
-      <input
-        type="email"
-        id="correo"
-        placeholder="Correo"
-        required
-      >
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-      <textarea
-        id="asunto"
-        placeholder="Describe el problema"
-        rows="5"
-        required
-      ></textarea>
+  <title>Mesa de Ayuda</title>
+
+  <style>
+
+    *{
+      margin:0;
+      padding:0;
+      box-sizing:border-box;
+      font-family:Arial, Helvetica, sans-serif;
+    }
+
+    body{
+      height:100vh;
+      display:flex;
+      justify-content:center;
+      align-items:center;
+      background:linear-gradient(135deg,#0f172a,#1e293b);
+    }
+
+    .contenedor{
+      width:400px;
+      background:white;
+      padding:35px;
+      border-radius:20px;
+      box-shadow:0 10px 30px rgba(0,0,0,0.3);
+    }
+
+    .titulo{
+      text-align:center;
+      margin-bottom:25px;
+    }
+
+    .titulo h1{
+      color:#0f172a;
+      margin-bottom:5px;
+    }
+
+    .titulo p{
+      color:gray;
+      font-size:14px;
+    }
+
+    .grupo{
+      margin-bottom:18px;
+    }
+
+    label{
+      display:block;
+      margin-bottom:8px;
+      font-weight:bold;
+      color:#1e293b;
+    }
+
+    input,
+    textarea{
+      width:100%;
+      padding:12px;
+      border:1px solid #cbd5e1;
+      border-radius:10px;
+      outline:none;
+      transition:0.3s;
+    }
+
+    input:focus,
+    textarea:focus{
+      border-color:#2563eb;
+      box-shadow:0 0 8px rgba(37,99,235,0.3);
+    }
+
+    textarea{
+      resize:none;
+    }
+
+    button{
+      width:100%;
+      padding:14px;
+      border:none;
+      border-radius:12px;
+      background:#2563eb;
+      color:white;
+      font-size:16px;
+      font-weight:bold;
+      cursor:pointer;
+      transition:0.3s;
+    }
+
+    button:hover{
+      background:#1d4ed8;
+      transform:scale(1.02);
+    }
+
+    #mensaje{
+      margin-top:18px;
+      text-align:center;
+      font-weight:bold;
+    }
+
+    #codigoRespuesta{
+      margin-top:8px;
+      text-align:center;
+      color:#64748b;
+      font-size:14px;
+    }
+
+  </style>
+
+</head>
+
+<body>
+
+  <div class="contenedor">
+
+    <div class="titulo">
+      <h1>REPORTES DE AYUDA</h1>
+      <p>Soporte técnico y registro de tickets</p>
+    </div>
+
+    <form id="ticketForm">
+
+      <div class="grupo">
+        <label>Nombre</label>
+        <input
+          type="text"
+          id="nombre"
+          placeholder="Ingresa tu nombre"
+        >
+      </div>
+
+      <div class="grupo">
+        <label>Correo</label>
+        <input
+          type="email"
+          id="correo"
+          placeholder="correo@miumg.edu.gt"
+        >
+      </div>
+
+      <div class="grupo">
+        <label>Categoría</label>
+
+        <select id="categoria">
+
+        <option value="">Seleccione una categoría</option>
+
+        <option value="Hardware">
+          Hardware
+        </option>
+
+        <option value="Software">
+          Software
+        </option>
+
+        <option value="Red">
+          Red
+        </option>
+
+        <option value="Correo">
+          Correo
+        </option>
+
+        <option value="Base de Datos">
+          Base de Datos
+        </option>
+
+        <option value="Otros">
+          Otros
+        </option>
+
+      </select>
+
+      </div>
+
+      <div class="grupo">
+        <label>Problema</label>
+        <textarea
+          id="asunto"
+          placeholder="Describe el problema"
+          rows="5"
+        ></textarea>
+      </div>
 
       <button type="submit">
         Enviar Ticket
@@ -22,6 +193,8 @@
     </form>
 
     <div id="mensaje"></div>
+    <div id="codigoRespuesta"></div>
+
   </div>
 
 <script>
@@ -31,16 +204,38 @@ document.getElementById('ticketForm')
 
   e.preventDefault();
 
+  const mensaje =
+  document.getElementById('mensaje');
+
+  const codigo =
+  document.getElementById('codigoRespuesta');
+
+  mensaje.innerHTML = "Enviando ticket...";
+  mensaje.style.color = "#2563eb";
+
+  codigo.innerHTML = "";
+
   const datos = {
-    nombre: document.getElementById('nombre').value,
-    correo: document.getElementById('correo').value,
-    asunto: document.getElementById('asunto').value
+
+    nombre:
+    document.getElementById('nombre').value,
+
+    correo:
+    document.getElementById('correo').value,
+
+    categoria:
+    document.getElementById('categoria').value,
+
+    asunto:
+    document.getElementById('asunto').value
+
   };
+  console.log(datos);
 
   try {
 
     const respuesta = await fetch(
-      'http://localhost:5678/webhook-test/nuevo-ticket',
+      'http://localhost:5678/webhook-test/crear-ticket',
       {
         method: 'POST',
         headers: {
@@ -50,25 +245,71 @@ document.getElementById('ticketForm')
       }
     );
 
-    if (respuesta.ok) {
+    codigo.innerHTML =
+    "Código HTTP: " + respuesta.status;
 
-      document.getElementById('mensaje').innerHTML =
-      '✅ Ticket enviado correctamente';
+    const resultado =
+    await respuesta.json();
+
+    if (respuesta.status === 200) {
+
+      mensaje.innerHTML =
+      "✅ " + resultado.mensaje;
+
+      mensaje.style.color = "green";
 
       document.getElementById('ticketForm').reset();
 
-    } else {
+    }
 
-      document.getElementById('mensaje').innerHTML =
-      '❌ Error enviando ticket';
+    else if (respuesta.status === 400) {
+
+      mensaje.innerHTML =
+      "⚠️ " + resultado.mensaje;
+
+      mensaje.style.color = "#f59e0b";
+
+    }
+
+    else if (respuesta.status === 401) {
+
+      mensaje.innerHTML =
+      "📧 " + resultado.mensaje;
+
+      mensaje.style.color = "#ef4444";
+
+    }
+
+    else if (respuesta.status === 500) {
+
+      mensaje.innerHTML =
+      "💥 Error interno del servidor";
+
+      mensaje.style.color = "#dc2626";
+
+    }
+
+    else {
+
+      mensaje.innerHTML =
+      "❌ Error desconocido";
+
+      mensaje.style.color = "red";
+
     }
 
   } catch(error) {
 
     console.error(error);
 
-    document.getElementById('mensaje').innerHTML =
-    '❌ Error de conexión con n8n';
+    mensaje.innerHTML =
+    "🔌 No fue posible conectar con n8n";
+
+    mensaje.style.color = "#f97316";
+
+    codigo.innerHTML =
+    "Sin respuesta del servidor";
+
   }
 
 });
