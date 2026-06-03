@@ -3,16 +3,15 @@ services:
   postgres:
     image: postgres:16
     container_name: postgres_helpdesk
-
     restart: always
 
     environment:
-      POSTGRES_USER: admin
-      POSTGRES_PASSWORD: admin123
-      POSTGRES_DB: helpdesk
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
 
     ports:
-      - "5433:5432"
+      - "${POSTGRES_PORT}:5432"
 
     volumes:
       - postgres_data:/var/lib/postgresql/data
@@ -20,23 +19,21 @@ services:
   adminer:
     image: adminer
     container_name: adminer_helpdesk
-
     restart: always
 
     ports:
-      - "8080:8080"
+      - "${ADMINER_PORT}:8080"
 
   n8n:
     image: n8nio/n8n
     container_name: n8n_helpdesk
-
     restart: always
 
     ports:
-      - "5678:5678"
+      - "${N8N_PORT}:5678"
 
     environment:
-      - TZ=America/Guatemala
+      - TZ=${TZ}
 
     volumes:
       - ./n8n_data:/home/node/.n8n
