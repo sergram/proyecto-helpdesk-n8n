@@ -114,8 +114,6 @@ Funciones:
 ### WF-02 Procesamiento
 
 Funciones:
-
-* Generación de código de ticket
 * Clasificación por categoría
 * Priorización automática
 * Registro en PostgreSQL
